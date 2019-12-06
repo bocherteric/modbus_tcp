@@ -5,6 +5,8 @@
 int main(int argc, char *argv[])
 {
     //set IP-Address
+    //another silly git test:)
+    //oops, already staged but forgot this important comment
     QString ip = "127.0.0.1";
 
     //set Controller Set-Points
