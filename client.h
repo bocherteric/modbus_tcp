@@ -15,6 +15,7 @@ class Client : public QObject
     QTcpSocket* _socket = nullptr;
     bool _connectStatus = false;
     float _power=0;
+    bool _flag=false;
 
 
     float requestResponse();
@@ -27,6 +28,8 @@ public:
     float checkLvVoltage();
     bool changeAcPower(float power);
     bool connectStatus();
+
+    float genericRead(quint8 address);
 
     void printBitWise(qint8 byte);
     void printBitWise(qint16 bytes);

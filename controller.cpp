@@ -11,13 +11,17 @@ Controller::Controller(QString ip, int SP1, int SP2, int SP3, int SP4, QObject* 
     //connect(this, &Controller::loopRepeat, this, &Controller::controlLoop);
     //controlLoop();
 
-    timer = new QTimer(this);
-    connect(timer, &QTimer::timeout, this, &Controller::testLoop);
-    timer->start(1000);
+    timerLV = new QTimer(this);
+    connect(timerLV, &QTimer::timeout, this, &Controller::readLVloop);
+    timerLV->start(10000);
+
+    timerAC = new QTimer(this);
+    connect(timerAC, &QTimer::timeout, this, &Controller::chargeLoop);
+    timerAC->start(30000);
 
 }
 
-void Controller::testLoop(){
+void Controller::readLVloop(){
 
     if(client->connectStatus()==true){
         float LV = client->checkLvVoltage();
@@ -30,7 +34,33 @@ void Controller::testLoop(){
         if (LV == 999){
             errorState();
         }
-        //timer->stop();
+        //timerLV->stop();
+    }
+}
+
+void Controller::chargeLoop(){
+
+    if(client->connectStatus()==true){
+
+        float charge =100;
+        float testCharge;
+        bool correctness;
+        correctness =client->changeAcPower(charge);
+
+        if(!correctness){
+            errorState();
+        }
+
+        testCharge = ((client->genericRead(0x0c))*10);
+
+        /*
+        if(charge==testCharge){
+            qDebug()<< "Charge value applied correctly";
+        }else {
+            qDebug() << "Charge value NOT applied correctly";
+            qDebug() << "testCharge =" << testCharge;
+            errorState();
+        }*/
     }
 }
 
@@ -70,4 +100,6 @@ void Controller::controlLoop(){
 void Controller::errorState(){
     //disconnect(this, &Controller::loopRepeat, this, &Controller::controlLoop);
     qDebug() << "errror State was entered";
+    timerAC->stop();
+    timerLV->stop();
 }

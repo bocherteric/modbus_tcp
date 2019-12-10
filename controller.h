@@ -14,7 +14,8 @@ class Controller : public QObject
     const int _SP3;
     const int _SP4;
 
-    QTimer* timer =nullptr;
+    QTimer* timerLV =nullptr;
+    QTimer* timerAC =nullptr;
     Client* client = nullptr;
     void errorState();
 
@@ -24,7 +25,8 @@ public:
 
 public slots:
     void controlLoop();
-    void testLoop();
+    void chargeLoop();
+    void readLVloop();
 
 signals:
     void loopRepeat();
