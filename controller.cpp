@@ -1,14 +1,37 @@
 #include "controller.h"
 
 
+
+
 Controller::Controller(QString ip, int SP1, int SP2, int SP3, int SP4, QObject* parent)
     :QObject(parent),_ip(ip),_SP1(SP1),_SP2(SP2),_SP3(SP3),_SP4(SP4)
 {
-    //Client cl(ip);
-    client = new Client(ip);
-    connect(this, &Controller::loopRepeat, this, &Controller::controlLoop);
-    controlLoop();
 
+    client = new Client(ip);
+    //connect(this, &Controller::loopRepeat, this, &Controller::controlLoop);
+    //controlLoop();
+
+    timer = new QTimer(this);
+    connect(timer, &QTimer::timeout, this, &Controller::testLoop);
+    timer->start(1000);
+
+}
+
+void Controller::testLoop(){
+
+    if(client->connectStatus()==true){
+        float LV = client->checkLvVoltage();
+        static bool test = true;
+        if(test){
+            qDebug() << "LV value recieved by Controller";
+            test =false;
+        }
+        qDebug() << LV;
+        if (LV == 999){
+            errorState();
+        }
+        //timer->stop();
+    }
 }
 
 void Controller::controlLoop(){
@@ -39,11 +62,12 @@ void Controller::controlLoop(){
         errorState();
     }
 
-    emit loopRepeat();
+    // emit loopRepeat(); //QObject assertion mistake whilest compiling. Cannot triger slot through signal coming from said slot?
 
 
 }
 
 void Controller::errorState(){
-    disconnect(this, &Controller::loopRepeat, this, &Controller::controlLoop);
+    //disconnect(this, &Controller::loopRepeat, this, &Controller::controlLoop);
+    qDebug() << "errror State was entered";
 }

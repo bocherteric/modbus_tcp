@@ -1,13 +1,12 @@
 #include <QCoreApplication>
 #include "controller.h"
 
+//need to implement connected status, reading and writing may only be possible if the connected status is true
 
 int main(int argc, char *argv[])
 {
     //set IP-Address
-    //another silly git test:)
-    //oops, already staged but forgot this important comment
-    QString ip = "127.0.0.1";
+    QString ip = "Venus.local";
 
     //set Controller Set-Points
     int SP1= 9;

@@ -12,6 +12,8 @@ Client::Client(QString ip, QObject *parent)
     _socket = new QTcpSocket(this);
     _socket->connectToHost(ip,_port);
     connect(_socket, &QAbstractSocket::connected, this, &Client::signIn);
+    connect(_socket, &QAbstractSocket::disconnected, this, &Client::signIn);
+
 }
 
 
@@ -19,7 +21,7 @@ float Client::checkLvVoltage(){
     std::vector<quint8> vector;
 
     //building correct modbus request-message
-    /*vector.push_back(0x11); //random transaction Id
+    vector.push_back(0x11); //random transaction Id
     vector.push_back(0x11); //random transaction Id
     vector.push_back(0x00); //modbus specific protocol Id
     vector.push_back(0x00); //modbus specific protocol Id
@@ -29,9 +31,10 @@ float Client::checkLvVoltage(){
     vector.push_back(0x04); //F-code
     vector.push_back(0x00); //Register address for DC voltage
     vector.push_back(0x1a); //Register address for DC voltage
-    vector.push_back(0x00); //number of requested register
-    vector.push_back(0x01); //number of requested register*/
+    vector.push_back(0x00); //number of requested registers
+    vector.push_back(0x01); //number of requested registers
 
+    /*
     vector.push_back(0x11); //random transaction Id
     vector.push_back(0x11); //random transaction Id
     vector.push_back(0x00); //modbus specific protocol Id
@@ -43,13 +46,13 @@ float Client::checkLvVoltage(){
     vector.push_back(0x00); //Register address for DC voltage
     vector.push_back(0x04); //Register address for DC voltage
     vector.push_back(0x00); //number of requested register
-    vector.push_back(0x01); //number of requested register
+    vector.push_back(0x01); //number of requested register*/
 
     //send checkLvVoltage request-message
-    qDebug() << "sent checkLvVoltage request-message:";
+    //qDebug() << "sent checkLvVoltage request-message:";
     for(auto &x : vector){
         _stream << x;
-        qDebug() << x;
+        //qDebug() << x;
     }
 
     //connect(socketC, &QAbstractSocket::readyRead, this, &Client::receive);
@@ -75,13 +78,13 @@ float Client::requestResponse(){
         qDebug() << "Bug in requestResponse(): length1 != 0";
         return 999;
     }
-
+    /*
     qDebug() << "received message:";
     qDebug() << TID1 << TID2 << PID1 << PID2 << length1 << length2;
 
     for(auto &x :vector){
         qDebug() << x;
-    }
+    }*/
 
     //checking correctness
     if(vector.at(1) != 0x04){
@@ -94,7 +97,7 @@ float Client::requestResponse(){
     quint8 hexLsb= vector.at(4);
 
     float data = (hexMsb << 8) | hexLsb;
-    //data = (data/100); //Scalefactor for DC Volatge is 100
+    data = (data/100); //Scalefactor for DC Volatge is 100
 
     return data;
 }
@@ -199,8 +202,14 @@ void Client::signIn(){
     _stream.setDevice(_socket);
     _connectStatus =true;
     qDebug() << "Client connected";
-    changeAcPower(1);
-    //qDebug() << checkLvVoltage();
+}
+
+void Client::serverDisconnected(){
+    qDebug() << "Server disconnected";
+}
+
+bool Client::connectStatus(){
+    return _connectStatus;
 }
 
 

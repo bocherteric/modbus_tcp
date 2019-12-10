@@ -3,6 +3,8 @@
 
 #include "client.h"
 
+#include <QTimer>
+
 
 class Controller : public QObject
 {
@@ -12,6 +14,7 @@ class Controller : public QObject
     const int _SP3;
     const int _SP4;
 
+    QTimer* timer =nullptr;
     Client* client = nullptr;
     void errorState();
 
@@ -21,6 +24,7 @@ public:
 
 public slots:
     void controlLoop();
+    void testLoop();
 
 signals:
     void loopRepeat();

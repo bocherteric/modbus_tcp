@@ -26,6 +26,7 @@ public:
 
     float checkLvVoltage();
     bool changeAcPower(float power);
+    bool connectStatus();
 
     void printBitWise(qint8 byte);
     void printBitWise(qint16 bytes);
@@ -35,6 +36,7 @@ signals:
 
 public slots:
     void signIn();
+    void serverDisconnected();
 };
 
 #endif // CLIENT_H
