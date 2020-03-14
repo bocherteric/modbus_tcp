@@ -12,15 +12,15 @@ Controller::Controller(QString ip, int SP1, int SP2, int SP3, int SP4, QObject* 
     //controlLoop();
 
     timerLV = new QTimer(this);
-    connect(timerLV, &QTimer::timeout, this, &Controller::readLVloop);
+   // connect(timerLV, &QTimer::timeout, this, &Controller::readLVloop);
     timerLV->start(10000);
 
     timerAC = new QTimer(this);
-    connect(timerAC, &QTimer::timeout, this, &Controller::chargeLoop);
+   // connect(timerAC, &QTimer::timeout, this, &Controller::chargeLoop);
     timerAC->start(30000);
 
 }
-
+/*
 void Controller::readLVloop(){
 
     if(client->connectStatus()==true){
@@ -51,7 +51,7 @@ void Controller::chargeLoop(){
             errorState();
         }
 
-        testCharge = ((client->genericRead(0x0c))*10);
+        //testCharge = ((client->genericRead(0x0c))*10);
 
         /*
         if(charge==testCharge){
@@ -60,7 +60,7 @@ void Controller::chargeLoop(){
             qDebug() << "Charge value NOT applied correctly";
             qDebug() << "testCharge =" << testCharge;
             errorState();
-        }*/
+        }
     }
 }
 
@@ -103,3 +103,4 @@ void Controller::errorState(){
     timerAC->stop();
     timerLV->stop();
 }
+*/

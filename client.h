@@ -20,6 +20,8 @@ class Client : public QObject
 
     float requestResponse();
     bool changePowerResponse();
+    void genericReadResponse(quint8 transID);
+    void genericWriteResponse(quint8 transID);
 
 public:
     explicit Client(QObject *parent = nullptr);
@@ -29,17 +31,22 @@ public:
     bool changeAcPower(float power);
     bool connectStatus();
 
-    float genericRead(quint8 address);
+    void genericRead(quint8 transID);
+    void genericWrite(quint8 transID, float data);
 
     void printBitWise(qint8 byte);
     void printBitWise(qint16 bytes);
 
 
 signals:
+    void readResponse(quint8 transID, float data);
+    void writeResponse(quint8 transID, bool status);
 
 public slots:
     void signIn();
     void serverDisconnected();
+    void responseParsing();
+
 };
 
 #endif // CLIENT_H
