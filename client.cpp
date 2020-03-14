@@ -12,15 +12,46 @@ Client::Client(QString ip, QObject *parent)
     _socket = new QTcpSocket(this);
     _socket->connectToHost(ip,_port);
     connect(_socket, &QAbstractSocket::connected, this, &Client::signIn);
+    connect(_socket, &QAbstractSocket::disconnected, this, &Client::signIn);//?????????????????????????????????????????????????????????
+    connect(_socket, &QAbstractSocket::readyRead, this, &Client::responseParsing);
+
 }
 
+//genericRead
+//
+void Client::genericRead(quint8 transID){
+    /*###############ADDRESSES_FOR_READ_REQUESTS##########################
+ * Input power 1: quint8 1 -> 0x0c //Scalefactor: 0.1
+ * Battery voltage: quint8 2 -> 0x1a //Scalefactor: 100
+ * Battery current: quint8 3 -> 0x1b //Scalefactor: 10
+ * ESS power setpoint phase: transID 5 -> 0x25 //Scalefactor: 1
+ */
 
-float Client::checkLvVoltage(){
     std::vector<quint8> vector;
+    quint8 addr;
 
+    switch (transID) {
+
+    case 1:
+        addr=0x0c;
+        break;
+    case 2:
+        addr=0x1a;
+        break;
+    case 3:
+        addr=0x1b;
+        break;
+    case 5:
+        addr=0x25;
+        break;
+    default:
+        qDebug() << "genericRead:Wrong transID!!!";
+        //emit Signal to warn MAinWindow that something went wrong!
+
+    }
     //building correct modbus request-message
-    /*vector.push_back(0x11); //random transaction Id
-    vector.push_back(0x11); //random transaction Id
+    vector.push_back(transID); //transaction Id
+    vector.push_back(0x00); //random transaction Id
     vector.push_back(0x00); //modbus specific protocol Id
     vector.push_back(0x00); //modbus specific protocol Id
     vector.push_back(0x00); //message length, 6 bytes follow
@@ -28,179 +59,185 @@ float Client::checkLvVoltage(){
     vector.push_back(0xf2); //Unit-Id for Venus Gx VE.Bus port
     vector.push_back(0x04); //F-code
     vector.push_back(0x00); //Register address for DC voltage
-    vector.push_back(0x1a); //Register address for DC voltage
-    vector.push_back(0x00); //number of requested register
-    vector.push_back(0x01); //number of requested register*/
+    vector.push_back(addr); //Register address for DC voltage
+    vector.push_back(0x00); //number of requested registers
+    vector.push_back(0x01); //number of requested registers
 
-    vector.push_back(0x11); //random transaction Id
-    vector.push_back(0x11); //random transaction Id
-    vector.push_back(0x00); //modbus specific protocol Id
-    vector.push_back(0x00); //modbus specific protocol Id
-    vector.push_back(0x00); //message length, 6 bytes follow
-    vector.push_back(0x06); //message length, 6 bytes follow
-    vector.push_back(0x01); //Address
-    vector.push_back(0x03); //F-code 0x04 = Input register, 0x03 = Holding register
-    vector.push_back(0x00); //Register address for DC voltage
-    vector.push_back(0x04); //Register address for DC voltage
-    vector.push_back(0x00); //number of requested register
-    vector.push_back(0x01); //number of requested register
-
-    //send checkLvVoltage request-message
-    qDebug() << "sent checkLvVoltage request-message:";
+    qDebug() << "genericRead request message sent:";
     for(auto &x : vector){
         _stream << x;
-        qDebug() << x;
-    }
 
-    //connect(socketC, &QAbstractSocket::readyRead, this, &Client::receive);
-    while(_socket->waitForReadyRead(-1)==false){
-
+        //##############DEBUGGING###############
+        qDebug()<< x;
+        //##############DEBUGGING###############
     }
-    return requestResponse();
 }
 
-float Client::requestResponse(){
+//genericWrite
+//
+void Client::genericWrite(quint8 transID, float data){
+  /*###############ADDRESSES_FOR_READ_REQUESTS##########################
+   * ESS power setpoint phase 1: transID 4 -> 0x25 //Scalefactor: 1
+   */
+
     std::vector<quint8> vector;
-    quint8 TID1,TID2, PID1, PID2, length1, length2;
-    _stream >> TID1 >> TID2 >> PID1 >> PID2 >> length1 >> length2;
+    qint16 power = data;
+    quint8 addr;
 
-    if(length1 == 0){
-        for(quint8 i=0; i<length2; i++){
-            quint8 value;
-            _stream >> value;
-            vector.push_back(value);
+    switch(transID){
+        case 4:
+            addr=0x25;
+            break;
+    default:
+        qDebug() << "genericRead:Wrong transID!!!";
+        //emit Signal to warn MAinWindow that something went wrong!
 
-        }
-    }else {
-        qDebug() << "Bug in requestResponse(): length1 != 0";
-        return 999;
     }
 
-    qDebug() << "received message:";
-    qDebug() << TID1 << TID2 << PID1 << PID2 << length1 << length2;
-
-    for(auto &x :vector){
-        qDebug() << x;
-    }
-
-    //checking correctness
-    if(vector.at(1) != 0x04){
-        qDebug() << "Bug in requestResponse(): F-Code != 0x04";
-        return 999;
-    }
-
-    //extracting data
-    quint8 hexMsb= vector.at(3);
-    quint8 hexLsb= vector.at(4);
-
-    float data = (hexMsb << 8) | hexLsb;
-    //data = (data/100); //Scalefactor for DC Volatge is 100
-
-    return data;
-}
-
-
-bool Client::changeAcPower(float p){
-    std::vector<quint8> vector;
-
-    qDebug() << "float p:"<< p;
-
-    qint16 power = p;
-    qDebug() << "qint16 power:" << power;
-    qDebug() << "qint16 power bitwise:";
-    printBitWise(power);
-
-    /* //needed if stream works better with bytes only
-    qint8 powerMsb = ((power >> 8) & 0xff);
-    qDebug() << "qint8 powerMsb:" << powerMsb;
-    qDebug() << "qint18 powerMsb bitwise:";
-    printBitWise(powerMsb);
-
-
-    qint8 powerLsb = (power & 0xff);
-    qDebug() << "qint8 powerLsb:" << powerLsb;
-    qDebug() << "qint18 powerLsb bitwise:";
-    printBitWise(powerLsb);
-    */
-
-    /*vector.push_back(0x11); //random transaction Id
-    vector.push_back(0x11); //random transaction Id
-    vector.push_back(0x00); //modbus specific protocol Id
-    vector.push_back(0x00); //modbus specific protocol Id
-    vector.push_back(0x00); //message length, 8 bytes follow
-    vector.push_back(0x08); //message length, 8 bytes follow
-    vector.push_back(0xf2); //Unit-Id for Venus Gx VE.Bus port
-    vector.push_back(0x06); //F-code: write single register
-    vector.push_back(0x00); //Register address for DC voltage
-    vector.push_back(0x25); //Register address for DC voltage
-    vector.push_back(0x00); //number of requested register
-    vector.push_back(0x01); //number of requested register*/
-
-    vector.push_back(0x11); //random transaction Id
-    vector.push_back(0x11); //random transaction Id
+    vector.push_back(transID); //random transaction Id
+    vector.push_back(0x00); //random transaction Id
     vector.push_back(0x00); //modbus specific protocol Id
     vector.push_back(0x00); //modbus specific protocol Id
     vector.push_back(0x00); //message length, 8 bytes follow
     vector.push_back(0x06); //message length, 8 bytes follow
-    vector.push_back(0x01); //Address
-    vector.push_back(0x06); //F-code 0x04 = Input register, 0x03 = Holding register
-    vector.push_back(0x00); //Register address
-    vector.push_back(0x10); //Register address
+    vector.push_back(0xf2); //Unit-Id for Venus Gx VE.Bus port
+    vector.push_back(0x06); //F-code: write single register
+    vector.push_back(0x00); //Register address for DC voltage
+    vector.push_back(addr); //Register address for DC voltage
 
-    //send changeAcPower request
-    qDebug() << "sent changeAcPower request:";
+    qDebug() << "genericWrite request message sent:";
     for(auto &x : vector){
         _stream << x;
+
+        //##############DEBUGGING###############
         qDebug() << x;
+        //##############DEBUGGING###############
     }
     _stream << power;
+
+    //##############DEBUGGING###############
     qDebug() << power;
-
-    while(_socket->waitForReadyRead(-1)==false){}
-
-    return changePowerResponse();
+    //##############DEBUGGING###############
 }
 
+//responseParsing
+//
+//distinguishes between Write- and Read-Response, calls correct method for either
+//
+void Client::responseParsing(){
+    quint8 transID;
+    _stream >> transID;
 
-bool Client::changePowerResponse(){
+    if(transID <=3 || transID == 5){
+        genericReadResponse(transID);
+    }else if(transID==4){
+        genericWriteResponse(transID);
+    }else {
+        qDebug()<< "Error in responseParsing";
+    }
+}
+
+//genericReadResponse
+//
+//extracts value from response message, multiplies value with according scalefactor and sends to MainWindow
+//
+void Client::genericReadResponse(quint8 transID){
+
     std::vector<quint8> vector;
-    quint8 TID1,TID2, PID1, PID2, length1, length2;
-    _stream >> TID1 >> TID2 >> PID1 >> PID2 >> length1 >> length2;
+    quint8 TID2, PID1, PID2, length1, length2;
+    _stream >> TID2 >> PID1 >> PID2 >> length1 >> length2;
 
-    if(length1 == 0){
         for(quint8 i=0; i<length2; i++){
             quint8 value;
             _stream >> value;
             vector.push_back(value);
 
         }
-    }else {
-        qDebug() << "Bug in changePowerResponse(): length1 != 0";
-        return false;
-    }
 
-    qDebug() << "received message:";
-    qDebug() << TID1 << TID2 << PID1 << PID2 << length1 << length2;
+
+    //##############DEBUGGING###############
+    qDebug() << "genericReadResponse - received message:";
+    qDebug() << transID << TID2 << PID1 << PID2 << length1 << length2;
 
     for(auto &x :vector){
         qDebug() << x;
     }
+    //##############DEBUGGING###############
 
-    if(vector.at(1)== 0x06){
-        return true;
-    }else {
-        qDebug() << "Bug in changePowerResponse(): F-Code != 0x06";
-        return false;
+    quint8 hexMsb= vector.at(3);
+    quint8 hexLsb= vector.at(4);
+    float data = (hexMsb << 8) | hexLsb;
+
+    switch(transID){
+
+    case 1:
+        data= (data*10);
+        break;
+    case 2:
+        data= (data/100);
+        break;
+    case 3:
+        data= (data/10);
+        break;
+    case 5:
+        break;
+    default:
+        qDebug() << "wrong transID in genericReadResponse";
     }
 
+    emit readResponse(transID, data);
 }
+
+//genericWriteResponse
+//
+//checks if write request was sucessfull and sends status to MainWindow
+void Client::genericWriteResponse(quint8 transID){
+    std::vector<quint8> vector;
+    bool status = false;
+    quint8 TID2, PID1, PID2, length1, length2;
+    _stream >> TID2 >> PID1 >> PID2 >> length1 >> length2;
+
+        for(quint8 i=0; i<length2; i++){
+            quint8 value;
+            _stream >> value;
+            vector.push_back(value);
+        }
+
+    //##############DEBUGGING###############
+    qDebug() << "genericWriteResponse - received message:";
+    qDebug() << transID << TID2 << PID1 << PID2 << length1 << length2;
+
+    for(auto &x :vector){
+        qDebug() << x;
+    }
+    //##############DEBUGGING###############
+
+    if(vector.at(1)== 0x06){
+        status =true;
+    }else {
+        qDebug() << "Bug in changePowerResponse(): F-Code != 0x06";
+        for(auto &x :vector){
+            qDebug() <<x;
+        }
+    }
+    emit writeResponse(transID, status);
+
+}
+
+//##############THIS&THAT###############
 
 void Client::signIn(){
     _stream.setDevice(_socket);
     _connectStatus =true;
     qDebug() << "Client connected";
-    changeAcPower(1);
-    //qDebug() << checkLvVoltage();
+}
+
+void Client::serverDisconnected(){
+    qDebug() << "Server disconnected";
+}
+
+bool Client::connectStatus(){
+    return _connectStatus;
 }
 
 
