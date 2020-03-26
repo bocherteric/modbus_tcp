@@ -1,11 +1,5 @@
 #include "client.h"
 
-Client::Client(QObject *parent) : QObject(parent)
-{
-
-}
-
-
 Client::Client(QString ip, QObject *parent)
     :QObject(parent), _ip(ip)
 {
@@ -15,22 +9,29 @@ Client::Client(QString ip, QObject *parent)
     connect(_socket, &QAbstractSocket::disconnected, this, &Client::signIn);//?????????????????????????????????????????????????????????
     connect(_socket, &QAbstractSocket::readyRead, this, &Client::responseParsing);
 
+    /*###############GUI_COMMAND########################
+ * 1_LV_Voltage -> TID2: 1
+ * 2_Power_Setpoint -> TID2: 2
+ * 3_Control -> TID2: 3
+ * 4_Any_Request -> TID2: 4
+ */
+
 }
 
 //genericRead
 //
-void Client::genericRead(quint8 transID){
+void Client::genericRead(quint8 TID1, quint8 TID2){
     /*###############ADDRESSES_FOR_READ_REQUESTS##########################
- * Input power 1: quint8 1 -> 0x0c //Scalefactor: 0.1
- * Battery voltage: quint8 2 -> 0x1a //Scalefactor: 100
- * Battery current: quint8 3 -> 0x1b //Scalefactor: 10
- * ESS power setpoint phase: transID 5 -> 0x25 //Scalefactor: 1
+ * Input power 1 -> TID1: 1 -> Register-address: 0x0c //Scalefactor: 0.1
+ * Battery voltage -> TID1: 2 -> Register-address: 0x1a //Scalefactor: 100
+ * Battery current -> TID1: 3 -> Register-address: 0x1b //Scalefactor: 10
+ * ESS power setpoint phase -> TID1: 5 -> Register-address: 0x25 //Scalefactor: 1
  */
 
     std::vector<quint8> vector;
     quint8 addr;
 
-    switch (transID) {
+    switch (TID1) {
 
     case 1:
         addr=0x0c;
@@ -45,13 +46,13 @@ void Client::genericRead(quint8 transID){
         addr=0x25;
         break;
     default:
-        qDebug() << "genericRead:Wrong transID!!!";
+        qDebug() << "genericRead:Wrong TID1!!!";
         //emit Signal to warn MAinWindow that something went wrong!
 
     }
     //building correct modbus request-message
-    vector.push_back(transID); //transaction Id
-    vector.push_back(0x00); //random transaction Id
+    vector.push_back(TID1); //transaction Id
+    vector.push_back(TID2); //random transaction Id
     vector.push_back(0x00); //modbus specific protocol Id
     vector.push_back(0x00); //modbus specific protocol Id
     vector.push_back(0x00); //message length, 6 bytes follow
@@ -75,27 +76,27 @@ void Client::genericRead(quint8 transID){
 
 //genericWrite
 //
-void Client::genericWrite(quint8 transID, float data){
+void Client::genericWrite(quint8 TID1, quint8 TID2, float data){
   /*###############ADDRESSES_FOR_READ_REQUESTS##########################
-   * ESS power setpoint phase 1: transID 4 -> 0x25 //Scalefactor: 1
+   * ESS power setpoint phase 1 -> TID1: 4 -> Register-address: 0x25 //Scalefactor: 1
    */
 
     std::vector<quint8> vector;
     qint16 power = data;
     quint8 addr;
 
-    switch(transID){
+    switch(TID1){
         case 4:
             addr=0x25;
             break;
     default:
-        qDebug() << "genericRead:Wrong transID!!!";
+        qDebug() << "genericRead:Wrong TID1!!!";
         //emit Signal to warn MAinWindow that something went wrong!
 
     }
 
-    vector.push_back(transID); //random transaction Id
-    vector.push_back(0x00); //random transaction Id
+    vector.push_back(TID1); //random transaction Id
+    vector.push_back(TID2); //random transaction Id
     vector.push_back(0x00); //modbus specific protocol Id
     vector.push_back(0x00); //modbus specific protocol Id
     vector.push_back(0x00); //message length, 8 bytes follow
@@ -125,13 +126,13 @@ void Client::genericWrite(quint8 transID, float data){
 //distinguishes between Write- and Read-Response, calls correct method for either
 //
 void Client::responseParsing(){
-    quint8 transID;
-    _stream >> transID;
+    quint8 TID1;
+    _stream >> TID1;
 
-    if(transID <=3 || transID == 5){
-        genericReadResponse(transID);
-    }else if(transID==4){
-        genericWriteResponse(transID);
+    if(TID1 <=3 || TID1 == 5){
+        genericReadResponse(TID1);
+    }else if(TID1==4){
+        genericWriteResponse(TID1);
     }else {
         qDebug()<< "Error in responseParsing";
     }
@@ -141,7 +142,7 @@ void Client::responseParsing(){
 //
 //extracts value from response message, multiplies value with according scalefactor and sends to MainWindow
 //
-void Client::genericReadResponse(quint8 transID){
+void Client::genericReadResponse(quint8 TID1){
 
     std::vector<quint8> vector;
     quint8 TID2, PID1, PID2, length1, length2;
@@ -157,7 +158,7 @@ void Client::genericReadResponse(quint8 transID){
 
     //##############DEBUGGING###############
     qDebug() << "genericReadResponse - received message:";
-    qDebug() << transID << TID2 << PID1 << PID2 << length1 << length2;
+    qDebug() << TID1 << TID2 << PID1 << PID2 << length1 << length2;
 
     for(auto &x :vector){
         qDebug() << x;
@@ -168,7 +169,7 @@ void Client::genericReadResponse(quint8 transID){
     quint8 hexLsb= vector.at(4);
     float data = (hexMsb << 8) | hexLsb;
 
-    switch(transID){
+    switch(TID1){
 
     case 1:
         data= (data*10);
@@ -182,16 +183,16 @@ void Client::genericReadResponse(quint8 transID){
     case 5:
         break;
     default:
-        qDebug() << "wrong transID in genericReadResponse";
+        qDebug() << "wrong TID1 in genericReadResponse";
     }
 
-    emit readResponse(transID, data);
+    emit readResponse(TID1, TID2, data);
 }
 
 //genericWriteResponse
 //
 //checks if write request was sucessfull and sends status to MainWindow
-void Client::genericWriteResponse(quint8 transID){
+void Client::genericWriteResponse(quint8 TID1){
     std::vector<quint8> vector;
     bool status = false;
     quint8 TID2, PID1, PID2, length1, length2;
@@ -205,7 +206,7 @@ void Client::genericWriteResponse(quint8 transID){
 
     //##############DEBUGGING###############
     qDebug() << "genericWriteResponse - received message:";
-    qDebug() << transID << TID2 << PID1 << PID2 << length1 << length2;
+    qDebug() << TID1 << TID2 << PID1 << PID2 << length1 << length2;
 
     for(auto &x :vector){
         qDebug() << x;
@@ -220,7 +221,7 @@ void Client::genericWriteResponse(quint8 transID){
             qDebug() <<x;
         }
     }
-    emit writeResponse(transID, status);
+    emit writeResponse(TID1, TID2, status);
 
 }
 

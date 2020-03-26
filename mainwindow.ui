@@ -13,26 +13,13 @@
   <property name="windowTitle">
    <string>MainWindow</string>
   </property>
-  <widget class="QPushButton" name="pushButtonE">
-   <property name="geometry">
-    <rect>
-     <x>320</x>
-     <y>10</y>
-     <width>191</width>
-     <height>71</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>Emergency STOP</string>
-   </property>
-  </widget>
   <widget class="QWidget" name="gridLayoutWidget">
    <property name="geometry">
     <rect>
      <x>10</x>
      <y>10</y>
      <width>301</width>
-     <height>141</height>
+     <height>156</height>
     </rect>
    </property>
    <layout class="QGridLayout" name="gridLayout">
@@ -43,10 +30,13 @@
       </property>
      </widget>
     </item>
-    <item row="3" column="0">
-     <widget class="QLabel" name="label">
+    <item row="1" column="0">
+     <widget class="QTextBrowser" name="browser1"/>
+    </item>
+    <item row="1" column="1">
+     <widget class="QPushButton" name="pushButton1">
       <property name="text">
-       <string>2. Power Set-Point</string>
+       <string>Read LV_U</string>
       </property>
      </widget>
     </item>
@@ -57,18 +47,15 @@
       </property>
      </widget>
     </item>
-    <item row="1" column="1">
-     <widget class="QPushButton" name="pushButton1">
+    <item row="3" column="0">
+     <widget class="QLabel" name="label">
       <property name="text">
-       <string>Read LV_U</string>
+       <string>2. Power Set-Point</string>
       </property>
      </widget>
     </item>
     <item row="4" column="0">
      <widget class="QPlainTextEdit" name="text2"/>
-    </item>
-    <item row="1" column="0">
-     <widget class="QTextBrowser" name="browser1"/>
     </item>
    </layout>
   </widget>
@@ -76,9 +63,9 @@
    <property name="geometry">
     <rect>
      <x>10</x>
-     <y>390</y>
+     <y>450</y>
      <width>671</width>
-     <height>321</height>
+     <height>261</height>
     </rect>
    </property>
    <layout class="QGridLayout" name="gridLayout_3">
@@ -124,59 +111,13 @@
     </item>
    </layout>
   </widget>
-  <widget class="QWidget" name="gridLayoutWidget_4">
-   <property name="geometry">
-    <rect>
-     <x>10</x>
-     <y>160</y>
-     <width>301</width>
-     <height>131</height>
-    </rect>
-   </property>
-   <layout class="QGridLayout" name="gridLayout_4">
-    <item row="0" column="1">
-     <widget class="QLabel" name="label_3">
-      <property name="text">
-       <string>3. Control</string>
-      </property>
-     </widget>
-    </item>
-    <item row="1" column="1">
-     <widget class="QPlainTextEdit" name="text3U"/>
-    </item>
-    <item row="2" column="1">
-     <widget class="QPlainTextEdit" name="text3P"/>
-    </item>
-    <item row="1" column="2">
-     <widget class="QPushButton" name="pushButton3">
-      <property name="text">
-       <string>Start</string>
-      </property>
-     </widget>
-    </item>
-    <item row="1" column="0">
-     <widget class="QLabel" name="label_4">
-      <property name="text">
-       <string>U</string>
-      </property>
-     </widget>
-    </item>
-    <item row="2" column="0">
-     <widget class="QLabel" name="label_5">
-      <property name="text">
-       <string>P</string>
-      </property>
-     </widget>
-    </item>
-   </layout>
-  </widget>
   <widget class="QTextBrowser" name="browserEmergency">
    <property name="geometry">
     <rect>
      <x>320</x>
-     <y>90</y>
+     <y>10</y>
      <width>361</width>
-     <height>61</height>
+     <height>151</height>
     </rect>
    </property>
   </widget>
@@ -184,7 +125,7 @@
    <property name="geometry">
     <rect>
      <x>10</x>
-     <y>300</y>
+     <y>350</y>
      <width>671</width>
      <height>87</height>
     </rect>
@@ -226,40 +167,81 @@
     </item>
    </layout>
   </widget>
-  <widget class="QWidget" name="gridLayoutWidget_5">
+  <widget class="QWidget" name="gridLayoutWidget_4">
    <property name="geometry">
     <rect>
-     <x>320</x>
-     <y>160</y>
-     <width>361</width>
-     <height>131</height>
+     <x>10</x>
+     <y>170</y>
+     <width>661</width>
+     <height>171</height>
     </rect>
    </property>
-   <layout class="QGridLayout" name="gridLayout_5">
-    <item row="0" column="1">
-     <widget class="QLabel" name="label_13">
-      <property name="text">
-       <string>Timer</string>
-      </property>
-     </widget>
-    </item>
-    <item row="2" column="1">
-     <widget class="QTextBrowser" name="timer3"/>
-    </item>
-    <item row="1" column="1">
-     <widget class="QTextBrowser" name="timer2"/>
-    </item>
-    <item row="1" column="0">
+   <layout class="QGridLayout" name="gridLayout_4">
+    <item row="4" column="1">
      <widget class="QLabel" name="label_14">
       <property name="text">
-       <string>T2:</string>
+       <string>SP4</string>
       </property>
      </widget>
     </item>
     <item row="2" column="0">
+     <widget class="QPlainTextEdit" name="textSP1"/>
+    </item>
+    <item row="1" column="1">
+     <widget class="QLabel" name="label_16">
+      <property name="text">
+       <string>SP2</string>
+      </property>
+     </widget>
+    </item>
+    <item row="1" column="0">
      <widget class="QLabel" name="label_15">
       <property name="text">
-       <string>T3:</string>
+       <string>SP1</string>
+      </property>
+     </widget>
+    </item>
+    <item row="0" column="0">
+     <widget class="QLabel" name="label_3">
+      <property name="text">
+       <string>2. Control Loop</string>
+      </property>
+     </widget>
+    </item>
+    <item row="6" column="0">
+     <widget class="QPlainTextEdit" name="textSP3"/>
+    </item>
+    <item row="6" column="1">
+     <widget class="QPlainTextEdit" name="textSP4"/>
+    </item>
+    <item row="4" column="0">
+     <widget class="QLabel" name="label_13">
+      <property name="text">
+       <string>SP3</string>
+      </property>
+     </widget>
+    </item>
+    <item row="2" column="1">
+     <widget class="QPlainTextEdit" name="textSP2"/>
+    </item>
+    <item row="2" column="2">
+     <widget class="QPushButton" name="pushButtonSP">
+      <property name="text">
+       <string>Submit Set Points</string>
+      </property>
+     </widget>
+    </item>
+    <item row="6" column="2">
+     <widget class="QPushButton" name="pushButtonStart">
+      <property name="text">
+       <string>Start</string>
+      </property>
+     </widget>
+    </item>
+    <item row="6" column="3">
+     <widget class="QPushButton" name="pushButtonStop">
+      <property name="text">
+       <string>Stop</string>
       </property>
      </widget>
     </item>

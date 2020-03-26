@@ -20,7 +20,7 @@ class Client : public QObject
 
     float requestResponse();
     bool changePowerResponse();
-    void genericReadResponse(quint8 transID);
+    void genericReadResponse(quint8 pups);
     void genericWriteResponse(quint8 transID);
 
 public:
@@ -31,16 +31,16 @@ public:
     bool changeAcPower(float power);
     bool connectStatus();
 
-    void genericRead(quint8 transID);
-    void genericWrite(quint8 transID, float data);
+    void genericRead(quint8 TID1, quint8 TID2);
+    void genericWrite(quint8 TID1, quint8 TID2, float data);
 
     void printBitWise(qint8 byte);
     void printBitWise(qint16 bytes);
 
 
 signals:
-    void readResponse(quint8 transID, float data);
-    void writeResponse(quint8 transID, bool status);
+    void readResponse(quint8 TID1, quint8 TID2, float data);
+    void writeResponse(quint8 TID1, quint8 TID2, bool status);
 
 public slots:
     void signIn();
