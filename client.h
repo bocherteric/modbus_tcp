@@ -27,13 +27,11 @@ public:
     explicit Client(QObject *parent = nullptr);
     Client(QString _ip, QObject *parent = nullptr);
 
-    float checkLvVoltage();
-    bool changeAcPower(float power);
-    bool connectStatus();
-
     void genericRead(quint8 TID1, quint8 TID2);
-    void genericWrite(quint8 TID1, quint8 TID2, float data);
+    void genericWrite(quint8 TID1, quint8 TID2, qint16 data);
 
+    //for debugging
+    bool connectStatus();
     void printBitWise(qint8 byte);
     void printBitWise(qint16 bytes);
 

@@ -9,13 +9,15 @@ MainWindow::MainWindow(QString ip, QWidget *parent) :
     client = new Client(_ip);
     timer = new QTimer(this);
 
-    //needs to be member too, also needs a connect
-    //QElapsedTimer * timer2 = new QElapsedTimer();
+    //does it need a connect?
+    timer2 = new QElapsedTimer();
+    //qDebug() << "system clock is monotonic and will not overflow: " << timer2->isMonotonic();
 
     //1_LV_Voltage
     connect(ui->pushButton1,&QPushButton::clicked,this, &MainWindow::readLVvoltge);
     //2_Power_Setpoint
     connect(ui->pushButton2, &QPushButton::clicked, this, &MainWindow::setPowerSP);
+    connect(ui->pushButton2_1, &QPushButton::clicked, this, &MainWindow::setPoint);
     //4_Any_Request
     connect(ui->pushButton4, &QPushButton::clicked, this, &MainWindow::anyRequest);
     //5_Response_Management
@@ -25,9 +27,13 @@ MainWindow::MainWindow(QString ip, QWidget *parent) :
     //3_Control
     connect(ui->pushButtonSP, &QPushButton::clicked,this, &MainWindow::setSP);
     connect(ui->pushButtonStart, &QPushButton::clicked,this, &MainWindow::startTimer);
-    //connect(ui->pushButtonStop, &QPushButton::clicked,this, &MainWindow::setSP);
-    //implementation of stop_Button missing
+    connect(ui->pushButtonStop, &QPushButton::clicked,this, &MainWindow::stopTimer);
+    connect(this, &MainWindow::stopControlLoop,this, &MainWindow::stopTimer);
     connect(timer, &QTimer::timeout, this, &MainWindow::controlLoop);
+
+    //GUI
+    ui->pushButtonStart->setEnabled(false);
+    ui->pushButtonStop->setEnabled(false);
 
 }
 
@@ -46,11 +52,29 @@ void MainWindow::readLVvoltge(){
 //2_Power_Setpoint
 //
 void MainWindow::setPowerSP(){
+    disableControlLoop(true);
     QString text = ui->text2->toPlainText();
-    _power =text.toFloat();
+    _powerSP2 =text.toShort();
+    //qDebug() << "powerSP2: " << _powerSP2;
+    timer2->start();
+    client->genericWrite(4,2,_powerSP2);
+}
 
-    timer->start();
-    client->genericWrite(4,2,_power);
+void MainWindow::disableControlLoop(bool flag){
+    if(flag){
+        ui->pushButtonStart->setEnabled(false);
+        ui->pushButtonStop->setEnabled(false);
+        ui->pushButtonSP->setEnabled(false);
+    }else{
+        ui->pushButtonStart->setEnabled(false);
+        ui->pushButtonStop->setEnabled(false);
+        ui->pushButtonSP->setEnabled(true);
+
+    }
+}
+
+void MainWindow::setPoint(){
+    client->genericWrite(4,99,0);
 }
 
 //3_Control
@@ -58,25 +82,32 @@ void MainWindow::setPowerSP(){
 // incomplete
 //
 void MainWindow::setSP(){
-    //need to check if every field is full and if the values in the fields are making sense
+
     QString text1 = ui->textSP1->toPlainText();
     QString text2 = ui->textSP2->toPlainText();
     QString text3 = ui->textSP3->toPlainText();
     QString text4 = ui->textSP4->toPlainText();
-    _SP1 = text1.toInt();
-    _SP2 = text2.toInt();
-    _SP3 = text3.toInt();
-    _SP4 = text4.toInt();
-    //dont forget to disable button during running of control loop
-    //activate start button
+    _SP1 = text1.toFloat();
+    _SP2 = text2.toFloat();
+    _SP3 = text3.toFloat();
+    _SP4 = text4.toFloat();
 
+    if(_SP1<_SP2 && _SP2<_SP3 && _SP3<_SP4 && _SP1 > 0){
+        qDebug("Power setpoints are set");
+        //qDebug() <<_SP1 << ", " << _SP2 << ", " << _SP3 << ", " << _SP4;
+        ui->pushButtonStart->setEnabled(true);
+    }else{
+        qDebug("0<SP1<SP2<SP3<SP4 not fulfilled");
+        //qDebug() <<_SP1 << ", " << _SP2 << ", " << _SP3 << ", " << _SP4;
+    }
 }
 
 void MainWindow::startTimer(){
+    disablePowerSP(true);
     controller = new Controller(_SP1, _SP2, _SP3, _SP4);
-    //disable pushButtonSP,pushButtonStart
-
-    timer->start(200);
+    ui->pushButtonStart->setEnabled(false);
+    ui->pushButtonStop->setEnabled(false);
+    timer->start(2000);
 }
 
 void MainWindow::controlLoop(){
@@ -84,21 +115,33 @@ void MainWindow::controlLoop(){
 }
 
 void MainWindow::stopTimer(){
+    timer->stop();
+    client->genericWrite(4,3,0);//sets power SP to 0
+}
 
+void MainWindow::disablePowerSP(bool flag){
+    if(flag){
+       ui->pushButton2->setEnabled(false);
+       ui->pushButton2_1->setEnabled(false);
+    }else{
+       ui->pushButton2->setEnabled(true);
+       ui->pushButton2_1->setEnabled(true);
+    }
 }
 
 //4_Any_Request
 //
 void MainWindow::anyRequest(){
     QString text = ui->text41->toPlainText();
-    quint8 request =text.toInt();
+    quint16 t = text.toUShort();
+    quint8 request =static_cast<quint8>(t); // could cast directly to unsigned char
     qDebug() << "anyRequest: request =" << request;
     if(request== 1 || request== 2 || request== 3 || request== 5){
         client->genericRead(request,4);
     }else if (request == 4) {
         QString text = ui->text42->toPlainText();
-        _power =text.toFloat();
-        client->genericWrite(request,4,_power);
+        _powerSP2 =text.toShort();
+        client->genericWrite(request,4,_powerSP2);
     }else {
         qDebug() << "anyRequest: wrong request!";
     }
@@ -110,43 +153,49 @@ void MainWindow::anyRequest(){
 //
 void MainWindow::writeResponse(quint8 TID1, quint8 TID2, bool status){
 
-    switch(TID2){
-    case 2:
-        if(status == true){
-            /*for time measurment
-             *
-            client->genericRead(1);*/
-            ui->browserEmergency->append("set SP true");
-        }else {
-            ui->browserEmergency->append("set SP false");
+    if(TID1 == 4){
+
+        switch(TID2){
+        case 2:
+            if(status == true){
+            client->genericRead(1,2);
+                qDebug("power setpoint was set correctly");
+            }else {
+                qDebug("MainWindow::writeResponse: power setpoint was not set");
+            }
+            break;
+        case 3:
+            if(status == true){
+                QString output = QString::number(_powerSP3);
+                ui->browserSP->append(output);
+            }else {
+                emit stopControlLoop();
+                qDebug("MainWindow::writeResponse: controlLoop stopped");
+            }
+
+            break;
+        case 4:
+            break;
+        case 99:
+            if(!status){
+                ui->browserEmergency->append("power setpoint was NOT reset correctly");
+            }
+            break;
+        default:
+            qDebug("MainWindow::writeResponse: wrong TID2");
         }
-        break;
-    case 3:
-       /*
-        * missing:
-        * part here
-        * exit control loop: stop button pressed + errors in communication with Inverter
-        * controller
-        * SP comparison
-        * UI
-        */
-        break;
-    case 4:
-        break;
-    default:
-        qDebug("MainWindow::writeResponse: wrong TID2");
+    }else{
+        qDebug("MainWindow::writeResponse: wrong TID1");
     }
 
 }
 
 //readResponse
 //
-//there needs to be a means of printing the correct values to the correct windows. Neue Übergabevariable?
-//
 void MainWindow::readResponse(quint8 TID1, quint8 TID2, float data){
     QString output = QString::number(data);
 
-    switch(TID2){
+    switch(TID2){ //distiniguishes between 4 possible GUI opertions
     case 1:
         if(TID1 == 2){
             ui->browser1->append(output);
@@ -157,43 +206,26 @@ void MainWindow::readResponse(quint8 TID1, quint8 TID2, float data){
     case 2:
         //check if everything is still correct after changes
         /*for measuring how much time passes before Power setpoint is actually set
-         *initiate timer2 object in constructor
-         *
-        switch(TID1){
-            case 1:
-            if(data==_power){
-                qDebug() << "hiuhiu" ;
-                int time =timer2->elapsed();
-                ui->timer2->append(QString::number(time));
+         */
+
+            if(static_cast<qint16>(data) ==_powerSP2){
+                qint64 time =timer2->elapsed();
+                ui->browserTimer->append(QString::number(time));
+                ui->browserSP->append(QString::number(data));
+                disableControlLoop(false);
             }else {
                 ui->browserSP->append(QString::number(data));
-                client->genericRead(1);
+                client->genericRead(1,2);
             }
-            break;
-
-        case 2:
-            if(LVclicked == true){
-                QString output = QString::number(data);
-                ui->browser1->append(output);
-                LVclicked =false;
-            }else {
-                qDebug() << "case2 in requestResponse";
-            }
-            break;
-        case 3:
-            qDebug() << "case3 in requestResponse";
-            break;
-        default:
-            qDebug() << "wrong TID1 in requestResponse";
-
-        }*/
         break;
     case 3:
         if(TID1 == 2){
-            //could implement the comparison of old and new value here
-            client->genericWrite(4,3,controller->controlLoop(data));
+            ui->browserU->append(output);
+            _powerSP3 = controller->controlLoop(data);
+            client->genericWrite(4,3,_powerSP3);
         }else{
-            qDebug("MainWindow::writeResponse(TID2 = 3): wrong TID1");
+            emit stopControlLoop();
+            qDebug("MainWindow::writeResponse: controlLoop stopped");
         }
         break;
     case 4:

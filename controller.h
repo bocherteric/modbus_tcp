@@ -9,25 +9,22 @@
 class Controller : public QObject
 {
 
-    const int _SP1;
-    const int _SP2;
-    const int _SP3;
-    const int _SP4;
+    const float _SP1;
+    const float _SP2;
+    const float _SP3;
+    const float _SP4;
 
-    QTimer* timerLV =nullptr;
-    QTimer* timerAC =nullptr;
-
-    void errorState();
+    float _m1;
+    float _m2;
+    float _t1;
+    float _t2;
 
 public:
-    Controller(int _SP1, int _SP2, int _SP3, int _SP4, QObject *parent = nullptr);
-    float controlLoop(float voltage);
-    float round(float power);
+    Controller(float _SP1, float _SP2, float _SP3, float _SP4, QObject *parent = nullptr);
+    qint16 controlLoop(float voltage);
 
 public slots:
-    void controlLoop();
-    void chargeLoop();
-    void readLVloop();
+
 
 };
 

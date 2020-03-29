@@ -7,7 +7,7 @@
 #include <QWidget>
 #include <QElapsedTimer>
 #include <QTimer>
-#include <QThread>
+
 
 namespace Ui {
 class MainWindow;
@@ -19,16 +19,16 @@ class MainWindow : public QWidget
     Client * client =nullptr;
     Controller * controller = nullptr;
     QTimer* timer =nullptr;
+    QElapsedTimer * timer2 = nullptr;
 
     const QString _ip;
-    float _power;
+    qint16 _powerSP2;
+    qint16 _powerSP3;
 
-    int _SP1;
-    int _SP2;
-    int _SP3;
-    int _SP4;
-
-   // float controlSP = 0;
+    float _SP1;
+    float _SP2;
+    float _SP3;
+    float _SP4;
 
     bool LVclicked = false;
     bool SPset = false;
@@ -44,12 +44,15 @@ public slots:
 
     //2_Power_Setpoint
     void setPowerSP();
+    void disableControlLoop(bool flag);
+    void setPoint();//better NAme!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
     //3_Control
     void setSP();
     void startTimer();
     void stopTimer();
     void controlLoop();
+    void disablePowerSP(bool flag);
 
     //4_Any_Request
     void anyRequest();
@@ -57,6 +60,9 @@ public slots:
     //5_Response_Management
     void readResponse(quint8 TID1, quint8 TID2, float data);
     void writeResponse(quint8 TID1, quint8 TID2, bool status);
+
+signals:
+    void stopControlLoop();
 
 private:
     Ui::MainWindow *ui;

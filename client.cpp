@@ -6,7 +6,7 @@ Client::Client(QString ip, QObject *parent)
     _socket = new QTcpSocket(this);
     _socket->connectToHost(ip,_port);
     connect(_socket, &QAbstractSocket::connected, this, &Client::signIn);
-    connect(_socket, &QAbstractSocket::disconnected, this, &Client::signIn);//?????????????????????????????????????????????????????????
+    connect(_socket, &QAbstractSocket::disconnected, this, &Client::serverDisconnected);
     connect(_socket, &QAbstractSocket::readyRead, this, &Client::responseParsing);
 
     /*###############GUI_COMMAND########################
@@ -14,6 +14,7 @@ Client::Client(QString ip, QObject *parent)
  * 2_Power_Setpoint -> TID2: 2
  * 3_Control -> TID2: 3
  * 4_Any_Request -> TID2: 4
+ * setting power setpoint to 0 -> TID2: 99
  */
 
 }
@@ -34,10 +35,22 @@ void Client::genericRead(quint8 TID1, quint8 TID2){
     switch (TID1) {
 
     case 1:
+        /*
+         * CHANGE BACK
+         *
         addr=0x0c;
+        *
+        * */
+        addr= 0x02;
         break;
     case 2:
+        /*
+         * CHANGE BACK
+         *
         addr=0x1a;
+        *
+        * */
+        addr=0x01;
         break;
     case 3:
         addr=0x1b;
@@ -76,7 +89,7 @@ void Client::genericRead(quint8 TID1, quint8 TID2){
 
 //genericWrite
 //
-void Client::genericWrite(quint8 TID1, quint8 TID2, float data){
+void Client::genericWrite(quint8 TID1, quint8 TID2, qint16 data){
   /*###############ADDRESSES_FOR_READ_REQUESTS##########################
    * ESS power setpoint phase 1 -> TID1: 4 -> Register-address: 0x25 //Scalefactor: 1
    */
@@ -87,7 +100,13 @@ void Client::genericWrite(quint8 TID1, quint8 TID2, float data){
 
     switch(TID1){
         case 4:
+            /*
+             * CHANGE BACK
+             *
             addr=0x25;
+            *
+            */
+            addr=0x08;;
             break;
     default:
         qDebug() << "genericRead:Wrong TID1!!!";
@@ -155,7 +174,6 @@ void Client::genericReadResponse(quint8 TID1){
 
         }
 
-
     //##############DEBUGGING###############
     qDebug() << "genericReadResponse - received message:";
     qDebug() << TID1 << TID2 << PID1 << PID2 << length1 << length2;
@@ -169,8 +187,10 @@ void Client::genericReadResponse(quint8 TID1){
     quint8 hexLsb= vector.at(4);
     float data = (hexMsb << 8) | hexLsb;
 
+    /*
+     *  CHANGE BACK
+     *
     switch(TID1){
-
     case 1:
         data= (data*10);
         break;
@@ -185,6 +205,8 @@ void Client::genericReadResponse(quint8 TID1){
     default:
         qDebug() << "wrong TID1 in genericReadResponse";
     }
+    *
+    * */
 
     emit readResponse(TID1, TID2, data);
 }
@@ -234,6 +256,7 @@ void Client::signIn(){
 }
 
 void Client::serverDisconnected(){
+    _connectStatus =false;
     qDebug() << "Server disconnected";
 }
 

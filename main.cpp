@@ -8,8 +8,14 @@
 int main(int argc, char *argv[])
 {
     //set IP-Address
-    QString ip = "Venus.local";
     //port is set automatically
+    /*
+     * CHANGE BACK
+     *
+    QString ip = "Venus.local";
+    *
+    * */
+    QString ip = "127.0.0.1";
 
     QApplication app(argc, argv);
     MainWindow w(ip);
@@ -17,5 +23,12 @@ int main(int argc, char *argv[])
 
     return app.exec();
 }
+
+/*TO_DO
+ *
+ *Tesing
+ *GUI
+ *2_power set points
+ */
 
 
