@@ -24,6 +24,7 @@ class MainWindow : public QWidget
     const QString _ip;
     qint16 _powerSP2;
     qint16 _powerSP3;
+    qint16 _powerSP4;
 
     float _SP1;
     float _SP2;
@@ -45,7 +46,8 @@ public slots:
     //2_Power_Setpoint
     void setPowerSP();
     void disableControlLoop(bool flag);
-    void setPoint();//better NAme!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    void setPowerSPZero();
+    void clearBrowser();
 
     //3_Control
     void setSP();

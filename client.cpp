@@ -53,10 +53,22 @@ void Client::genericRead(quint8 TID1, quint8 TID2){
         addr=0x01;
         break;
     case 3:
+        /*
+         * CHANGE BACK
+         *
         addr=0x1b;
+        *
+        * */
+        addr=0x03;
         break;
     case 5:
+        /*
+         * CHANGE BACK
+         *
         addr=0x25;
+        *
+        * */
+        addr=0x04;
         break;
     default:
         qDebug() << "genericRead:Wrong TID1!!!";

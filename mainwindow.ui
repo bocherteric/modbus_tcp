@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>694</width>
-    <height>726</height>
+    <width>691</width>
+    <height>760</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -19,36 +19,43 @@
      <x>10</x>
      <y>10</y>
      <width>301</width>
-     <height>205</height>
+     <height>231</height>
     </rect>
    </property>
    <layout class="QGridLayout" name="gridLayout">
-    <item row="1" column="0">
-     <widget class="QTextBrowser" name="browser1"/>
-    </item>
-    <item row="3" column="0">
-     <widget class="QLabel" name="label">
-      <property name="text">
-       <string>2. Power Set-Point</string>
-      </property>
-     </widget>
+    <item row="6" column="0">
+     <widget class="QTextBrowser" name="browserTimer"/>
     </item>
     <item row="0" column="0">
      <widget class="QLabel" name="label_2">
       <property name="text">
-       <string>1. LV Voltage</string>
+       <string>1. Battery Voltage</string>
       </property>
      </widget>
+    </item>
+    <item row="4" column="1">
+     <widget class="QPushButton" name="pushButton2">
+      <property name="text">
+       <string>Set Power_SP</string>
+      </property>
+     </widget>
+    </item>
+    <item row="1" column="0">
+     <widget class="QTextBrowser" name="browser1"/>
     </item>
     <item row="5" column="0">
      <widget class="QLabel" name="label_4">
       <property name="text">
-       <string>Timer[ms]</string>
+       <string>Timer - SP[W]: time[ms]</string>
       </property>
      </widget>
     </item>
-    <item row="4" column="0">
-     <widget class="QPlainTextEdit" name="text2"/>
+    <item row="3" column="0">
+     <widget class="QLabel" name="label">
+      <property name="text">
+       <string>2. Power Setpoint</string>
+      </property>
+     </widget>
     </item>
     <item row="1" column="1">
      <widget class="QPushButton" name="pushButton1">
@@ -57,20 +64,20 @@
       </property>
      </widget>
     </item>
-    <item row="4" column="1">
-     <widget class="QPushButton" name="pushButton2">
+    <item row="4" column="0">
+     <widget class="QPlainTextEdit" name="text2"/>
+    </item>
+    <item row="5" column="1">
+     <widget class="QPushButton" name="pushButton2_2">
       <property name="text">
-       <string>Set power_SP</string>
+       <string>Clear</string>
       </property>
      </widget>
-    </item>
-    <item row="6" column="0">
-     <widget class="QTextBrowser" name="browserTimer"/>
     </item>
     <item row="6" column="1">
      <widget class="QPushButton" name="pushButton2_1">
       <property name="text">
-       <string>power_SP = 0</string>
+       <string>Power_SP = 0</string>
       </property>
      </widget>
     </item>
@@ -80,24 +87,24 @@
    <property name="geometry">
     <rect>
      <x>10</x>
-     <y>500</y>
+     <y>530</y>
      <width>671</width>
-     <height>211</height>
+     <height>221</height>
     </rect>
    </property>
    <layout class="QGridLayout" name="gridLayout_3">
     <item row="0" column="1">
      <widget class="QLabel" name="label_7">
       <property name="text">
-       <string>power setpoint [W]</string>
+       <string>Power setpoint [W]</string>
       </property>
      </widget>
     </item>
     <item row="1" column="2">
-     <widget class="QTextBrowser" name="browserSP"/>
+     <widget class="QTextBrowser" name="browserP"/>
     </item>
     <item row="1" column="1">
-     <widget class="QTextBrowser" name="browserI"/>
+     <widget class="QTextBrowser" name="browserSP"/>
     </item>
     <item row="1" column="0">
      <widget class="QTextBrowser" name="browserU"/>
@@ -122,7 +129,7 @@
     <item row="0" column="3">
      <widget class="QLabel" name="label_12">
       <property name="text">
-       <string>answer:</string>
+       <string>Answer of Any Request</string>
       </property>
      </widget>
     </item>
@@ -134,7 +141,7 @@
      <x>320</x>
      <y>10</y>
      <width>361</width>
-     <height>211</height>
+     <height>251</height>
     </rect>
    </property>
    <property name="html">
@@ -145,31 +152,29 @@ p, li { white-space: pre-wrap; }
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;INPUT FORMAT&lt;/span&gt;&lt;/p&gt;
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;2. Power Set-Point:  XX0 &lt;/p&gt;
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;3. Control Loop: XX.XX&lt;/p&gt;
-&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-weight:600;&quot;&gt;&lt;br /&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
    </property>
   </widget>
   <widget class="QWidget" name="gridLayoutWidget_2">
    <property name="geometry">
     <rect>
      <x>10</x>
-     <y>400</y>
+     <y>430</y>
      <width>671</width>
-     <height>87</height>
+     <height>91</height>
     </rect>
    </property>
    <layout class="QGridLayout" name="gridLayout_2">
     <item row="0" column="0">
      <widget class="QLabel" name="label_9">
       <property name="text">
-       <string>4. Any request</string>
+       <string>4. Any Request</string>
       </property>
      </widget>
     </item>
     <item row="2" column="1">
      <widget class="QTextEdit" name="text42"/>
-    </item>
-    <item row="2" column="0">
-     <widget class="QTextEdit" name="text41"/>
     </item>
     <item row="2" column="2">
      <widget class="QPushButton" name="pushButton4">
@@ -181,15 +186,55 @@ p, li { white-space: pre-wrap; }
     <item row="1" column="0">
      <widget class="QLabel" name="label_10">
       <property name="text">
-       <string>address aka TID1:</string>
+       <string>Type of Request</string>
       </property>
      </widget>
     </item>
     <item row="1" column="1">
      <widget class="QLabel" name="label_11">
       <property name="text">
-       <string>data:</string>
+       <string>Data</string>
       </property>
+     </widget>
+    </item>
+    <item row="2" column="0">
+     <widget class="QComboBox" name="text41">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <item>
+       <property name="text">
+        <string/>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>Read Input Power(AC)</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>Read Battery Voltage</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>Read Battery Current</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>Write ESS Power Setpoint</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>Read ESS Power Setpoint</string>
+       </property>
+      </item>
      </widget>
     </item>
    </layout>
@@ -198,8 +243,8 @@ p, li { white-space: pre-wrap; }
    <property name="geometry">
     <rect>
      <x>10</x>
-     <y>220</y>
-     <width>661</width>
+     <y>250</y>
+     <width>671</width>
      <height>171</height>
     </rect>
    </property>
